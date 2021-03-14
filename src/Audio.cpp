@@ -199,6 +199,7 @@ esp_err_t Audio::I2Sstop(uint8_t i2s_num) {
 }
 //---------------------------------------------------------------------------------------------------------------------
 esp_err_t Audio::i2s_mclk_pin_select(const uint8_t pin) {
+#ifndef CONFIG_IDF_TARGET_ESP32S2
     if(pin != 0 && pin != 1 && pin != 3) {
         ESP_LOGE(TAG, "Only support GPIO0/GPIO1/GPIO3, gpio_num:%d", pin);
         return ESP_ERR_INVALID_ARG;
@@ -220,6 +221,7 @@ esp_err_t Audio::i2s_mclk_pin_select(const uint8_t pin) {
             break;
     }
     return ESP_OK;
+#endif
 }
 //---------------------------------------------------------------------------------------------------------------------
 Audio::~Audio() {
@@ -3026,7 +3028,7 @@ uint32_t Audio::getBitRate(){
 }
 //---------------------------------------------------------------------------------------------------------------------
 void Audio::setInternalDAC(bool internalDAC) {
-
+#ifndef CONFIG_IDF_TARGET_ESP32S2
     m_f_internalDAC = internalDAC;
 
     if (internalDAC)  {
@@ -3042,6 +3044,7 @@ void Audio::setInternalDAC(bool internalDAC) {
     }
     i2s_driver_uninstall((i2s_port_t)m_i2s_num);
     i2s_driver_install  ((i2s_port_t)m_i2s_num, &m_i2s_config, 0, NULL);
+#endif
 }
 //---------------------------------------------------------------------------------------------------------------------
 void Audio::setI2SCommFMT_LSB(bool commFMT) {
@@ -3077,9 +3080,11 @@ bool Audio::playSample(int16_t sample[2]) {
     sample[RIGHTCHANNEL] = sample[RIGHTCHANNEL] >> 1;
 
     // Filterchain, can commented out if not used
+#ifndef CONFIG_IDF_TARGET_ESP32S2
     sample = IIR_filterChain0(sample);
     sample = IIR_filterChain1(sample);
     sample = IIR_filterChain2(sample);
+#endif
     //-------------------------------------------
 
     uint32_t s32 = Gain(sample); // vosample2lume;
