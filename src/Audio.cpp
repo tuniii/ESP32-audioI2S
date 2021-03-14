@@ -139,7 +139,9 @@ uint32_t AudioBuffer::getReadPos() {
 }
 //---------------------------------------------------------------------------------------------------------------------
 Audio::Audio() {
+#ifndef CONFIG_IDF_TARGET_ESP32S2
    clientsecure.setInsecure();  // if that can't be resolved update to ESP32 Arduino version 1.0.5-rc05 or higher
+#endif
     //i2s configuration
     m_i2s_num = I2S_NUM_0; // i2s port number
     m_i2s_config.mode                 = (i2s_mode_t)(I2S_MODE_MASTER | I2S_MODE_TX);
@@ -439,13 +441,13 @@ bool Audio::connecttoFS(fs::FS &fs, const char* file) {
     memcpy(m_audioName, s_file.c_str() + 1, s_file.length()); // skip the first '/'
     sprintf(chbuf, "Reading file: \"%s\"", m_audioName);
     if(audio_info) audio_info(chbuf);
-    
+
     if(fs.exists(path)) {
         audiofile = fs.open(path); // #86
     } else {
         audiofile = fs.open(s_file);
     }
-    
+
     if(!audiofile) {
         if(audio_info) audio_info("Failed to open file for reading");
         return false;
